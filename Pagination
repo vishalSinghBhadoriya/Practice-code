@@ -1,0 +1,32 @@
+import React, { useState } from "react";
+
+function App() {
+  const data=Array.from({length:10},(_,i)=>`Item-${i+1}`);
+  const [page,setPage]=useState(1);
+  const perPage=3;
+  const start=(page-1)*perPage;
+  const end=start+perPage;
+  const filtered=data.slice(start,end)
+  return (
+    <div>
+      <h2>Product List</h2>
+      <ul>
+        
+        {
+          filtered.map((val,id)=>(
+          <li key={id}>
+            {val}
+          </li>
+          ))
+        }
+      </ul>
+      <button onClick={()=>setPage(prev=>prev-1)}
+      disabled={page==1}
+      >Prev</button>
+      <button onClick={()=>setPage(prev=>prev+1)}
+      disabled={end>=data.length}>Next</button>
+    </div>
+  );
+}
+
+export default App;
