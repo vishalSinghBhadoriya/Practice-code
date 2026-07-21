@@ -1,0 +1,57 @@
+import React, { useState, useEffect } from "react";
+
+function App() {
+  const[user,setUser]=useState("");
+  const[pass,setPass]=useState("");
+  const[login,setLogin]=useState(false);
+  const[error,setError]=useState("");
+  const u="admin";
+  const p="1234";
+  useEffect(()=>{
+    if(localStorage.getItem("isLoggedIn")=="true"){
+      setLogin(true);
+    }
+  },[]);
+ const handleSubmit=()=>{
+   if(user==u && pass==p){
+    setLogin(true);
+    localStorage.setItem("isLoggedIn","true");
+   }
+   else{
+     setError("invalid credentials")
+   }
+ };
+ const handleLogout=()=>{
+   setLogin(false);
+   setUser("");
+   setPass("");
+   localStorage.removeItem("isLoggedIn");
+ }
+ if(login){
+ return (
+   <>
+   <h2>Dashboard</h2>
+   <button onClick={handleLogout}>Logout</button>
+   </>
+   )
+ }
+  return (
+    <div style={{padding:"20px"}}>
+      <input
+      placeholder="Enter username"
+      value={user}
+      onChange={(e)=>setUser(e.target.value)}
+      />
+      <input
+      placeholder="Enter password"
+      type="password"
+      value={pass}
+      onChange={(e)=>setPass(e.target.value)}
+      />
+      <button onClick={handleSubmit}>Submit</button>
+      <p>{error}</p>
+    </div>
+  );
+}
+
+export default App;
