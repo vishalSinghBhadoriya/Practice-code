@@ -1,0 +1,49 @@
+import React, { useState } from "react";
+
+function App() {
+  const products = [
+    { id: 1, name: "iPhone", category: "Mobile" },
+    { id: 2, name: "Samsung Galaxy", category: "Mobile" },
+    { id: 3, name: "MacBook", category: "Laptop" },
+    { id: 4, name: "Dell XPS", category: "Laptop" }
+  ];
+
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+
+  const filteredProducts = products.filter((item) => {
+    return (
+      item.name.toLowerCase().includes(search.toLowerCase()) &&
+      (category === "All" || item.category === category)
+    );
+  });
+
+  return (
+    <div>
+      <h2>Product List</h2>
+
+      <input
+        type="text"
+        placeholder="Search product"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      <select onChange={(e) => setCategory(e.target.value)}>
+        <option>All</option>
+        <option>Mobile</option>
+        <option>Laptop</option>
+      </select>
+
+      <ul>
+        {filteredProducts.map((item) => (
+          <li key={item.id}>
+            {item.name} - {item.category}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default App;
