@@ -1,0 +1,144 @@
+import React, { useState, useEffect } from 'react';
+
+function App() {
+ 
+    const[user,setUser]=useState([]);
+    const[text,setText]=useState("");
+    const[loading,setLoading]=useState(true);
+    const[debounce,setDebounce]=useState("");
+    const[addUser,setAddUser]=useState("");
+    const[editId,setEditId]=useState(null);
+    const[editText,setEditText]=useState("");
+    const[currentPage,setCurrentPage]=useState(1);
+    const userPerPage=3;
+
+    //Api fetch
+    useEffect(()=>{
+       const timer=setTimeout(()=>{
+        fetch("https://jsonplaceholder.typicode.com/users")
+      .then((res)=>res.json())
+      .then((data)=>{setUser(data);
+      setLoading(false)
+      });
+      },100)
+      return()=> clearTimeout(timer)
+    },[])
+    //Debounce
+    useEffect(()=>{
+      const timer=setTimeout(()=>{
+        setDebounce(text);
+      },1000)
+      return()=>clearTimeout(timer);
+    },[text])
+    //Handle delete
+    const handleDelete=(id)=>{
+      setUser(prev=>prev.filter((data)=>data.id!=id))
+    }
+     //Handle edit
+    const handleEdit=(id,name)=>{
+      setEditId(id);
+      setEditText(name);
+    }
+    //Handle add
+    const handleAdd=()=>{
+      if(addUser.trim()!==""){
+      const obj={
+        id:Date.now(),
+        name:addUser
+        
+      }
+     setUser(prev=>[...prev,obj]);
+      }
+     setAddUser("")
+    }
+    //Handle Save
+    const handleSave=()=>{
+      if (editText.trim() === "") return;
+      setUser(prev=>prev.map(data=>data.id==editId
+      ?{...data,name:editText}:data));
+      setEditId(null);
+    }
+    
+    //Filter
+    const filtered=user.filter((data)=>data.name.toLowerCase().includes(debounce.toLowerCase()));
+    
+    const start=(currentPage-1)*userPerPage;
+    const end=start+userPerPage;
+    const currentUsers=filtered.slice(start,end);
+    const totalPage=Math.ceil(filtered.length/userPerPage);
+    const handlePrev=()=>{
+      if(currentPage>1)
+      setCurrentPage(prev=>prev-1)
+    }
+    const handleNext=()=>{
+      if(currentPage<totalPage)
+      setCurrentPage(prev=>prev+1)
+    }
+    const pages=[
+      currentPage-1,
+      currentPage,
+      currentPage+1
+      ].filter(page=>page>0 && page<=totalPage);
+    if(loading){
+      return <h2>Loading...</h2>
+    }
+  return (
+  
+    <div >
+      <input
+      placeholder="Search....."
+      value={text}
+      onChange={(e)=>setText(e.target.value)}
+
+      />
+      <input
+      placeholder="Enter a user"
+      value={addUser}
+      onChange={(e)=>setAddUser(e.target.value)}
+      />
+      <button onClick={handleAdd}>Add user</button>
+      <ul>
+        {
+        (currentUsers.length==0)?<p>No result..</p>:
+          currentUsers.map((data)=>(
+          <li key={data.id}>
+            {editId==data.id?(
+            <>
+              <input placeholder="Edit user"
+              value={editText}
+              onChange={(e)=>setEditText(e.target.value)}
+              />
+              <button onClick={handleSave}>Save</button><button onClick={()=>handleDelete(data.id)}>X</button>
+            </>
+              ):
+            (
+            <>
+            {data.name}
+          <button onClick={()=>handleEdit(data.id,data.name)}>Edit</button>
+          <button onClick={()=>handleDelete(data.id)}>X</button>
+          </>
+          )
+            }
+            
+          </li>
+          ))
+        }
+      </ul>
+      <div class="pagination">
+       <button onClick={handlePrev}>Prev</button>
+       <div>
+         {
+           pages.map((page)=>(
+           <button onClick={()=>setCurrentPage(page)
+             
+           }>{page}</button>
+           ))
+         }
+       </div>
+       <button onClick={handleNext}>Next</button>
+      </div>
+    </div>
+  )
+}
+
+export default App;
