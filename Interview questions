@@ -1,0 +1,10 @@
+Q1. Why do we use useEffect?
+useEffect is used to synchronize a React component with external systems such as APIs, browser APIs, localStorage, timers, subscriptions, or third-party libraries after rendering.
+
+Q)Error
+| Situation                          | Solution                     |
+| ---------------------------------- | ---------------------------- |
+| API fails                          | `try...catch`                |
+| Form validation                    | Validation logic             |
+| User clicks button and code throws | `try...catch` inside handler |
+| Component crashes while rendering  | Error Boundary               |
