@@ -1,5 +1,5 @@
 Q1. Why do we use useEffect?
-useEffect is used to synchronize a React component with external systems such as APIs, browser APIs, localStorage, timers, subscriptions, or third-party libraries after rendering.
+Ans:useEffect is used to synchronize a React component with external systems such as APIs, browser APIs, localStorage, timers, subscriptions, or third-party libraries after rendering.
 
 Q)Error
 | Situation                          | Solution                     |
@@ -8,3 +8,6 @@ Q)Error
 | Form validation                    | Validation logic             |
 | User clicks button and code throws | `try...catch` inside handler |
 | Component crashes while rendering  | Error Boundary               |
+
+Q)"What would you optimize first in a slow React application?"
+Ans:First, I'd measure the problem using the React DevTools Profiler or browser performance tools. After identifying the bottleneck, I'd choose the appropriate optimization—such as reducing unnecessary re-renders, virtualizing large lists, improving algorithms, lazy loading, or optimizing network requests. I avoid adding optimizations without evidence because they can increase complexity without improving performance.
