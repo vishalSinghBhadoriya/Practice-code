@@ -1,0 +1,203 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
+const Api = () => {
+    const [user, setUser] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [newItem, setNewItem] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // GET
+    useEffect(() => {
+        axios
+            .get("https://jsonplaceholder.typicode.com/todos")
+            .then((res) => {
+                setUser(res.data);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, []);
+
+    // DELETE
+    const handleDelete = (id) => {
+        axios
+            .delete(
+                `https://jsonplaceholder.typicode.com/todos/${id}`
+            )
+            .then((res) => {
+                console.log("Deleted:", res.data);
+
+                setUser((prev) =>
+                    prev.filter((data) => data.id !== id)
+                );
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+
+    // POST
+    const handleAdd = () => {
+        if (!newItem.trim()) return;
+
+        const newData = {
+            title: newItem,
+            completed: false,
+            userId: 1
+        };
+
+        axios
+            .post(
+                "https://jsonplaceholder.typicode.com/todos",
+                newData
+            )
+            .then((res) => {
+                console.log("Created:", res.data);
+
+                setUser((prev) => [
+                    res.data,
+                    ...prev
+                ]);
+
+                setNewItem("");
+                setCurrentPage(1);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+
+    // SEARCH
+    const filtered = user.filter((data) =>
+        data.title
+            .toLowerCase()
+            .includes(search.toLowerCase())
+    );
+
+    // PAGINATION
+    const postPerPage = 10;
+
+    const totalPages = Math.ceil(
+        filtered.length / postPerPage
+    );
+
+    const start =
+        (currentPage - 1) * postPerPage;
+
+    const end = start + postPerPage;
+
+    const filteredItem =
+        filtered.slice(start, end);
+
+    // 3 visible pages
+    const pages = [
+        currentPage - 1,
+        currentPage,
+        currentPage + 1
+    ].filter(
+        (page) =>
+            page > 0 &&
+            page <= totalPages
+    );
+
+    if (loading) {
+        return <h2>Loading....</h2>;
+    }
+
+    return (
+        <div>
+            <h2>Todo</h2>
+
+            {/* Search */}
+            <input
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                }}
+            />
+
+            {/* Add */}
+            <input
+                placeholder="Add..."
+                value={newItem}
+                onChange={(e) =>
+                    setNewItem(e.target.value)
+                }
+            />
+
+            <button onClick={handleAdd}>
+                Add
+            </button>
+
+            {/* List */}
+            {filteredItem.length === 0 ? (
+                <h2>No result</h2>
+            ) : (
+                <ul>
+                    {filteredItem.map((data) => (
+                        <li key={data.id}>
+                            {data.title}
+
+                            <button
+                                onClick={() =>
+                                    handleDelete(data.id)
+                                }
+                            >
+                                X
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 0 && (
+                <div className="Pagination">
+                    <button
+                        disabled={currentPage === 1}
+                        onClick={() =>
+                            setCurrentPage(
+                                (prev) => prev - 1
+                            )
+                        }
+                    >
+                        Prev
+                    </button>
+
+                    {pages.map((page) => (
+                        <button
+                            key={page}
+                            onClick={() =>
+                                setCurrentPage(page)
+                            }
+                        >
+                            {page}
+                        </button>
+                    ))}
+
+                    <button
+                        disabled={
+                            currentPage === totalPages
+                        }
+                        onClick={() =>
+                            setCurrentPage(
+                                (prev) => prev + 1
+                            )
+                        }
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default Api;
