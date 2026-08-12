@@ -2,53 +2,101 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const Api = () => {
+    // -----------------------------
+    // STATE
+    // -----------------------------
+
+    // Stores all todos fetched from API
     const [user, setUser] = useState([]);
+
+    // Loading state for initial API request
     const [loading, setLoading] = useState(true);
+
+    // Stores search input
     const [search, setSearch] = useState("");
+
+    // Stores the new todo input
     const [newItem, setNewItem] = useState("");
+
+    // Stores current pagination page
     const [currentPage, setCurrentPage] = useState(1);
 
-    // GET
+    // Stores the debounced search value
+    const [debounce, setDebounce] = useState("");
+
+    // Stores ID of the todo currently being edited
+    const [editId, setEditId] = useState(null);
+
+    // Stores the text while editing
+    const [editText, setEditText] = useState("");
+
+    // Stores API error
+    const [error, setError] = useState("");
+
+
+    // -----------------------------
+    // GET API
+    // Fetch todos when component mounts
+    // -----------------------------
+
     useEffect(() => {
         axios
             .get("https://jsonplaceholder.typicode.com/todos")
             .then((res) => {
+                // Store API response in state
                 setUser(res.data);
             })
             .catch((error) => {
                 console.log(error);
+                setError("Failed to fetch todos.");
             })
             .finally(() => {
+                // Stop loading after request completes
                 setLoading(false);
             });
     }, []);
 
-    // DELETE
+
+    // -----------------------------
+    // DELETE API
+    // Delete todo by ID
+    // -----------------------------
+
     const handleDelete = (id) => {
         axios
             .delete(
                 `https://jsonplaceholder.typicode.com/todos/${id}`
             )
-            .then((res) => {
-                console.log("Deleted:", res.data);
-
+            .then(() => {
+                // Remove deleted todo from React state
                 setUser((prev) =>
                     prev.filter((data) => data.id !== id)
                 );
             })
             .catch((error) => {
                 console.log(error);
+                setError("Failed to delete todo.");
             });
     };
 
-    // POST
-    const handleAdd = () => {
-        if (!newItem.trim()) return;
 
+    // -----------------------------
+    // POST API
+    // Add new todo
+    // -----------------------------
+
+    const handleAdd = () => {
+
+        // Prevent empty todo
+        if (newItem.trim() === "") {
+            return;
+        }
+
+        // Data that will be sent to API
         const newData = {
             title: newItem,
             completed: false,
-            userId: 1
+            userId: 1,
         };
 
         axios
@@ -57,75 +105,233 @@ const Api = () => {
                 newData
             )
             .then((res) => {
-                console.log("Created:", res.data);
 
+                // Add newly created todo
+                // at the beginning of the array
                 setUser((prev) => [
                     res.data,
-                    ...prev
+                    ...prev,
                 ]);
 
+                // Clear input
                 setNewItem("");
+
+                // Go back to first page
                 setCurrentPage(1);
             })
             .catch((error) => {
                 console.log(error);
+                setError("Failed to add todo.");
             });
     };
 
-    // SEARCH
+
+    // -----------------------------
+    // DEBOUNCED SEARCH
+    // Wait 500ms after user stops typing
+    // -----------------------------
+
+    useEffect(() => {
+
+        const timer = setTimeout(() => {
+
+            // Update debounce value
+            setDebounce(search);
+
+        }, 500);
+
+        // Clear previous timer
+        // when search changes
+        return () => clearTimeout(timer);
+
+    }, [search]);
+
+
+    // -----------------------------
+    // FILTER DATA
+    // Search the complete user array
+    // -----------------------------
+
     const filtered = user.filter((data) =>
         data.title
             .toLowerCase()
-            .includes(search.toLowerCase())
+            .includes(debounce.trim().toLowerCase())
     );
 
+
+    // -----------------------------
     // PAGINATION
+    // -----------------------------
+
+    // Number of todos displayed per page
     const postPerPage = 10;
 
+    // Calculate total number of pages
     const totalPages = Math.ceil(
         filtered.length / postPerPage
     );
 
+    // Calculate starting index
     const start =
         (currentPage - 1) * postPerPage;
 
+    // Calculate ending index
     const end = start + postPerPage;
 
-    const filteredItem =
-        filtered.slice(start, end);
+    // Get only the todos for current page
+    const filteredItem = filtered.slice(
+        start,
+        end
+    );
 
-    // 3 visible pages
+
+    // -----------------------------
+    // PAGINATION BUTTONS
+    // Show current page + previous + next
+    // -----------------------------
+
     const pages = [
         currentPage - 1,
         currentPage,
-        currentPage + 1
+        currentPage + 1,
     ].filter(
         (page) =>
             page > 0 &&
             page <= totalPages
     );
 
+
+    // -----------------------------
+    // START EDITING
+    // -----------------------------
+
+    const handleEdit = (id, text) => {
+
+        // Store ID of todo being edited
+        setEditId(id);
+
+        // Put current title inside input
+        setEditText(text);
+    };
+
+
+    // -----------------------------
+    // PATCH API
+    // Update todo
+    // -----------------------------
+
+    const handleSave = (id) => {
+
+        // Prevent empty title
+        if (editText.trim() === "") {
+            return;
+        }
+
+        axios
+            .patch(
+                `https://jsonplaceholder.typicode.com/todos/${id}`,
+                {
+                    title: editText,
+                }
+            )
+            .then((res) => {
+
+                // Update only the matching todo
+                setUser((prev) =>
+                    prev.map((data) =>
+                        data.id === id
+                            ? {
+                                  ...data,
+                                  title: res.data.title,
+                              }
+                            : data
+                    )
+                );
+
+                // Exit edit mode
+                setEditId(null);
+
+                // Clear edit input
+                setEditText("");
+            })
+            .catch((error) => {
+                console.log(error);
+                setError("Failed to update todo.");
+            });
+    };
+
+
+    // -----------------------------
+    // CANCEL EDIT
+    // -----------------------------
+
+    const handleCancel = () => {
+
+        // Exit edit mode
+        setEditId(null);
+
+        // Clear edit input
+        setEditText("");
+    };
+
+
+    // -----------------------------
+    // LOADING UI
+    // -----------------------------
+
     if (loading) {
-        return <h2>Loading....</h2>;
+        return <h2>Loading...</h2>;
     }
+
+
+    // -----------------------------
+    // MAIN UI
+    // -----------------------------
 
     return (
         <div>
-            <h2>Todo</h2>
 
-            {/* Search */}
+            <h2>Todo App</h2>
+
+
+            {/* -------------------------
+                ERROR MESSAGE
+            -------------------------- */}
+
+            {error && (
+                <p>
+                    {error}
+                </p>
+            )}
+
+
+            {/* -------------------------
+                SEARCH INPUT
+            -------------------------- */}
+
             <input
+                type="text"
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => {
+
+                    // Update search state
                     setSearch(e.target.value);
+
+                    // Whenever search changes,
+                    // go back to first page
                     setCurrentPage(1);
                 }}
             />
 
-            {/* Add */}
+
+            {/* -------------------------
+                ADD TODO INPUT
+            -------------------------- */}
+
             <input
-                placeholder="Add..."
+                type="text"
+                placeholder="Add todo..."
                 value={newItem}
                 onChange={(e) =>
                     setNewItem(e.target.value)
@@ -136,30 +342,112 @@ const Api = () => {
                 Add
             </button>
 
-            {/* List */}
-            {filteredItem.length === 0 ? (
-                <h2>No result</h2>
-            ) : (
-                <ul>
-                    {filteredItem.map((data) => (
-                        <li key={data.id}>
-                            {data.title}
 
-                            <button
-                                onClick={() =>
-                                    handleDelete(data.id)
-                                }
-                            >
-                                X
-                            </button>
+            {/* -------------------------
+                TODO LIST
+            -------------------------- */}
+
+            {filteredItem.length === 0 ? (
+
+                // No matching todo
+                <h2>No result</h2>
+
+            ) : (
+
+                <ul>
+
+                    {filteredItem.map((data) => (
+
+                        <li key={data.id}>
+
+                            {data.id === editId ? (
+
+                                // -------------------------
+                                // EDIT MODE
+                                // -------------------------
+
+                                <>
+                                    <input
+                                        value={editText}
+                                        onChange={(e) =>
+                                            setEditText(
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+
+                                    <button
+                                        onClick={() =>
+                                            handleSave(
+                                                data.id
+                                            )
+                                        }
+                                    >
+                                        Save
+                                    </button>
+
+                                    <button
+                                        onClick={
+                                            handleCancel
+                                        }
+                                    >
+                                        Cancel
+                                    </button>
+                                </>
+
+                            ) : (
+
+                                // -------------------------
+                                // NORMAL MODE
+                                // -------------------------
+
+                                <>
+                                    <span>
+                                        {data.title}
+                                    </span>
+
+                                    <button
+                                        onClick={() =>
+                                            handleEdit(
+                                                data.id,
+                                                data.title
+                                            )
+                                        }
+                                    >
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        onClick={() =>
+                                            handleDelete(
+                                                data.id
+                                            )
+                                        }
+                                    >
+                                        Delete
+                                    </button>
+                                </>
+
+                            )}
+
                         </li>
+
                     ))}
+
                 </ul>
             )}
 
-            {/* Pagination */}
+
+            {/* -------------------------
+                PAGINATION
+            -------------------------- */}
+
             {totalPages > 0 && (
+
                 <div className="Pagination">
+
+                    {/* PREVIOUS */}
+
                     <button
                         disabled={currentPage === 1}
                         onClick={() =>
@@ -171,16 +459,30 @@ const Api = () => {
                         Prev
                     </button>
 
+
+                    {/* PAGE NUMBERS */}
+
                     {pages.map((page) => (
+
                         <button
                             key={page}
                             onClick={() =>
                                 setCurrentPage(page)
                             }
+                            style={{
+                                fontWeight:
+                                    currentPage === page
+                                        ? "bold"
+                                        : "normal",
+                            }}
                         >
                             {page}
                         </button>
+
                     ))}
+
+
+                    {/* NEXT */}
 
                     <button
                         disabled={
@@ -194,8 +496,11 @@ const Api = () => {
                     >
                         Next
                     </button>
+
                 </div>
+
             )}
+
         </div>
     );
 };
