@@ -1,0 +1,5 @@
+1)How to create custom header?
+If it's a custom theme, I would create the header in header.php, register the navigation menu using register_nav_menus(), load it using get_header(), 
+and use WordPress functions such as wp_nav_menu() and the_custom_logo(). If the project uses Elementor Pro, 
+I would normally use Elementor Theme Builder to create the header and configure its display conditions.
+
