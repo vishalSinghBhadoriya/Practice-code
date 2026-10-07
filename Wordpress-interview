@@ -3,3 +3,13 @@ If it's a custom theme, I would create the header in header.php, register the na
 and use WordPress functions such as wp_nav_menu() and the_custom_logo(). If the project uses Elementor Pro, 
 I would normally use Elementor Theme Builder to create the header and configure its display conditions.
 
+2. What is WP_Query?
+WP_Query is a WordPress class used to retrieve posts from the WordPress database based on specific conditions.
+For example, suppose a client says:
+"Show the latest 6 blog posts on the homepage."
+
+You can use:
+$query = new WP_Query([
+    'post_type'      => 'post',
+    'posts_per_page' => 6
+]);
