@@ -55,3 +55,31 @@ ASC/DESC	order
 Pagination	paged
 Status	post_status
 Date filtering	date_query
+
+
+
+4)"For simple metadata, I can use WordPress functions like get_post_meta() and update_post_meta(). 
+For projects that need many field types and an easy admin interface, I often use ACF. 
+I create a field group, assign it to the relevant post type, and retrieve values with get_field() when rendering the template."
+
+
+5)What is a custom field in WordPress?
+A custom field is additional metadata attached to a post, page, or custom post type.
+For example:
+Post Type: team
+
+Title: Rahul Sharma
+
+Custom fields:
+designation = Frontend Developer
+experience  = 4 years
+email       = rahul@example.com
+
+
+WordPress stores this metadata in the wp_postmeta database table.
+The main functions are:
+Function	Purpose
+get_post_meta()	Retrieve metadata
+update_post_meta()	Add or update metadata
+add_post_meta()	Add metadata
+delete_post_meta()	Delete metadata
