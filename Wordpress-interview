@@ -190,3 +190,74 @@ if ($query->have_posts()) {
 }
 
 wp_reset_postdata();
+
+11) Practical task: Create a shortcode using ACF
+Suppose you have a team custom post type with an ACF field called designation.
+The client wants to use:
+[team_members limit="4"]
+function team_members_shortcode($atts) {
+
+    $atts = shortcode_atts([
+        'limit' => 4
+    ], $atts, 'team_members');
+
+    $limit = max(1, min(20, absint($atts['limit'])));
+
+    $query = new WP_Query([
+        'post_type'      => 'team',
+        'posts_per_page' => $limit,
+        'post_status'    => 'publish'
+    ]);
+
+    $output = '<div class="team-grid">';
+
+    if ($query->have_posts()) {
+
+        while ($query->have_posts()) {
+            $query->the_post();
+
+            $designation = function_exists('get_field')
+                ? get_field('designation')
+                : '';
+
+            $output .= '<article class="team-card">';
+
+            if (has_post_thumbnail()) {
+                $output .= get_the_post_thumbnail(
+                    get_the_ID(),
+                    'medium'
+                );
+            }
+
+            $output .= '<h3>' .
+                esc_html(get_the_title()) .
+                '</h3>';
+
+            if ($designation) {
+                $output .= '<p>' .
+                    esc_html($designation) .
+                    '</p>';
+            }
+
+            $output .= '</article>';
+        }
+
+    } else {
+        $output .= '<p>No team members found.</p>';
+    }
+
+    $output .= '</div>';
+
+    wp_reset_postdata();
+
+    return $output;
+}
+
+add_shortcode('team_members', 'team_members_shortcode');
+It combines several WordPress concepts:
+- Custom Post Types
+- ACF
+- WP_Query
+- The Loop
+- Shortcodes
+- Output escaping
