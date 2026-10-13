@@ -261,3 +261,20 @@ It combines several WordPress concepts:
 - The Loop
 - Shortcodes
 - Output escaping
+
+
+
+12. Practical interview task
+Try this scenario:
+Interviewer: "We have a WordPress website. The client wants a custom landing page with a hero section, an ACF image, a CTA button, and a grid of three latest blog posts. 
+How would you implement it?"
+A strong answer should explain these steps:
+1. Create a named custom Page Template.
+2. Create an ACF field group and assign it to the relevant Page.
+3. Retrieve the hero title, image, and CTA values using get_field().
+4. Render the latest three posts using WP_Query, specifying post_type => 'post' and posts_per_page => 3.
+5. Use the WordPress Loop to display each post and call wp_reset_postdata() after the secondary query.
+6. Escape output appropriately and use reusable template parts where suitable.
+7. Test the responsive layout and confirm that the client can edit the content in WordPress admin.
+The key concept to remember: A custom template controls how content is displayed. ACF controls how structured custom content is entered and retrieved. 
+WP_Query retrieves posts matching specified conditions. These three can work together to build dynamic WordPress websites.
