@@ -278,3 +278,35 @@ A strong answer should explain these steps:
 7. Test the responsive layout and confirm that the client can edit the content in WordPress admin.
 The key concept to remember: A custom template controls how content is displayed. ACF controls how structured custom content is entered and retrieved. 
 WP_Query retrieves posts matching specified conditions. These three can work together to build dynamic WordPress websites.
+
+
+
+Q13. A client wants to display weather information from an external API on the WordPress homepage. How would you do it?
+Answer:
+1. Obtain access to a suitable weather API.
+2. Use wp_remote_get() to request the weather data.
+3. Check errors and decode the JSON response.
+4. Extract the required fields, such as temperature and conditions.
+5. Display the result through a shortcode or template.
+6. Cache the response using transients to reduce unnecessary API calls.
+Keep API keys on the server, not in public frontend code.
+
+Scenario 2
+Q14. An external API works, but WordPress displays no data. What would you check?
+Answer:
+- Check the endpoint URL.
+- Check whether wp_remote_get() returns a WP_Error.
+- Inspect the HTTP response status code.
+- Verify the JSON response structure.
+- Confirm that the required field names exist.
+- Check API authentication, rate limits, and server connectivity.
+I would log diagnostic information safely rather than displaying sensitive API errors to visitors.
+
+
+Q15. A client wants to display WordPress posts in React. What would you do?
+Answer:
+I would use the WordPress REST API endpoint:
+/wp-json/wp/v2/posts
+
+Then I would fetch the posts using JavaScript's fetch() or Axios, store them in React state, and render them using .map(). 
+I would also handle loading states, errors, and pagination.
